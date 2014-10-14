@@ -7,8 +7,38 @@ import (
 )
 
 type Setting struct {
-	NumberOfShards   int `json:"number_of_shards"`
-	NumberOfReplicas int `json:"number_of_replicas"`
+	NumberOfShards   int             `json:"number_of_shards"`
+	NumberOfReplicas int             `json:"number_of_replicas"`
+	Analysis         *AnalysisOption `json:"analysis,omitempty"`
+}
+
+type AnalysisOption struct {
+	Analyzer  map[string]AnalyzerOption  `json:"analyzer"`
+	Tokenizer map[string]TokenizerOption `json:"tokenizer"`
+	Filter    map[string]FilterOption    `json:"filter"`
+}
+
+type AnalyzerOption struct {
+	Type       string   `json:"type"`
+	Tokenizer  string   `json:"tokenizer"`
+	Filter     []string `json:"filter,omitempty"`
+	CharFilter []string `json:"char_filter,omitempty"`
+}
+
+type TokenizerOption struct {
+	Type           string   `json:"type"`
+	MaxTokenLength int      `json:"max_token_length,omitempty"`
+	MinGram        int      `json:"min_gram,omitempty"`
+	MaxGram        int      `json:"max_gram,omitempty"`
+	TokenChars     []string `json:"token_chars,omitempty"`
+}
+
+type FilterOption struct {
+	Type      string   `json:"type"`
+	Name      string   `json:"name,omitempty"`
+	Stopwords []string `json:"stopwords,omitempty"`
+	Min       int      `json:"min,omitempty"`
+	Max       int      `json:"max,omitempty"`
 }
 
 func (c *Conn) PutSettings(index string, settings interface{}) (BaseResponse, error) {

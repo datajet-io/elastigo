@@ -21,7 +21,7 @@ import (
 type Mapping map[string]MappingOptions
 
 type MappingOptions struct {
-	Id         IdOptions              `json:"_id,omitempty"`
+	Id         *IdOptions             `json:"_id,omitempty"`
 	Timestamp  TimestampOptions       `json:"_timestamp,omitempty"`
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
@@ -35,6 +35,11 @@ type TimestampOptions struct {
 type IdOptions struct {
 	Index string `json:"index,omitempty"`
 	Path  string `json:"path,omitempty"`
+}
+
+type PropertyOptions struct {
+	Type  string `json:"type"`
+	Index string `json:"index,omitempty"`
 }
 
 func (m_ Mapping) Options() MappingOptions {
