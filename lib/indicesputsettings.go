@@ -34,11 +34,14 @@ type TokenizerOption struct {
 }
 
 type FilterOption struct {
-	Type      string   `json:"type"`
-	Name      string   `json:"name,omitempty"`
-	Stopwords []string `json:"stopwords,omitempty"`
-	Min       int      `json:"min,omitempty"`
-	Max       int      `json:"max,omitempty"`
+	Type       string   `json:"type"`
+	Name       string   `json:"name,omitempty"`
+	Stopwords  []string `json:"stopwords,omitempty"`
+	Min        int      `json:"min,omitempty"`
+	Max        int      `json:"max,omitempty"`
+	MinGram    int      `json:"min_gram,omitempty"`
+	MaxGram    int      `json:"max_gram,omitempty"`
+	TokenChars []string `json:"token_chars,omitempty"`
 }
 
 func (c *Conn) PutSettings(index string, settings interface{}) (BaseResponse, error) {
