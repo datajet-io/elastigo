@@ -28,6 +28,18 @@ type AliasActionItem struct {
 
 type Aliases map[string]interface{}
 
+func (c *Conn) CheckAlias(alias string) (bool, error) {
+	_, err := c.DoCommand("GET", "/_alias/"+alias, nil, nil)
+	if err != nil {
+		if err == RecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (c *Conn) PutAliases(oldIndex, newIndex, alias string) (BaseResponse, error) {
 	var retval BaseResponse
 
