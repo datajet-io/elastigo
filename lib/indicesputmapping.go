@@ -23,6 +23,7 @@ type Mapping map[string]MappingOptions
 type MappingOptions struct {
 	Id         *IdOptions             `json:"_id,omitempty"`
 	Timestamp  TimestampOptions       `json:"_timestamp,omitempty"`
+	TTL        TTLOptions             `json:"_ttl,omitempty"`
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
@@ -30,6 +31,11 @@ type TimestampOptions struct {
 	Enabled bool   `json:"enabled,omitempty"`
 	Store   bool   `json:"store,omitempty"`
 	Path    string `json:"path,omitempty"`
+}
+
+type TTLOptions struct {
+	Enabled bool   `json:"enabled,omitempty"`
+	Default string `json:"default,omitempty"`
 }
 
 type IdOptions struct {
