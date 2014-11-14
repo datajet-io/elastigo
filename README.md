@@ -1,9 +1,7 @@
 elastigo v2.0 
 -------------
 
-[![Build Status][1]][2] 
-[1]: https://drone.io/github.com/mattbaird/elastigo/status.png 
-[2]: https://drone.io/github.com/mattbaird/elastigo/latest
+[![Circle CI](https://circleci.com/gh/jiangjin/elastigo/tree/master.png?style=badge&circle-token=1c38b2dade17ffdb314e842084d5f5c1517ff8c8)](https://circleci.com/gh/jiangjin/elastigo/tree/master)
 [![Total views](https://sourcegraph.com/api/repos/github.com/mattbaird/elastigo/counters/views.png)](https://sourcegraph.com/github.com/mattbaird/elastigo)
 
 
