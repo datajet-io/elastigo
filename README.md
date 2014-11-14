@@ -2,6 +2,7 @@ elastigo v2.0
 -------------
 
 [![Circle CI](https://circleci.com/gh/jiangjin/elastigo/tree/master.png?style=badge&circle-token=1c38b2dade17ffdb314e842084d5f5c1517ff8c8)](https://circleci.com/gh/jiangjin/elastigo/tree/master)
+
 [![Total views](https://sourcegraph.com/api/repos/github.com/mattbaird/elastigo/counters/views.png)](https://sourcegraph.com/github.com/mattbaird/elastigo)
 
 
