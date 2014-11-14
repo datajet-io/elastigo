@@ -17,17 +17,20 @@ import (
 )
 
 type JsonAliases struct {
-	Actions []JsonAliasAdd `json:"actions"`
+	Actions []AliasAction `json:"actions"`
 }
 
-type JsonAliasAdd struct {
-	Add JsonAlias `json:"add"`
+type AliasAction struct {
+	Add    JsonAlias `json:"add,omitempty"`
+	Remove JsonAlias `json:"remove,omitempty"`
 }
 
 type JsonAlias struct {
 	Index string `json:"index"`
 	Alias string `json:"alias"`
 }
+
+type Aliases map[string]interface{}
 
 // The API allows you to create an index alias through an API.
 func (c *Conn) AddAlias(index string, alias string) (BaseResponse, error) {
@@ -41,7 +44,7 @@ func (c *Conn) AddAlias(index string, alias string) (BaseResponse, error) {
 	}
 
 	jsonAliases := JsonAliases{}
-	jsonAliasAdd := JsonAliasAdd{}
+	jsonAliasAdd := AliasAction{}
 	jsonAliasAdd.Add.Alias = alias
 	jsonAliasAdd.Add.Index = index
 	jsonAliases.Actions = append(jsonAliases.Actions, jsonAliasAdd)
@@ -62,4 +65,61 @@ func (c *Conn) AddAlias(index string, alias string) (BaseResponse, error) {
 	}
 
 	return retval, err
+}
+
+func (c *Conn) CheckAlias(alias string) (bool, error) {
+	_, err := c.DoCommand("GET", "/_alias/"+alias, nil, nil)
+	if err != nil {
+		if err == RecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (c *Conn) PutAliases(oldIndex, newIndex, alias string) (BaseResponse, error) {
+	var retval BaseResponse
+
+	actions := make([]AliasAction, 0)
+	aliasOption := JsonAliases{
+		Actions: actions,
+	}
+
+	if len(oldIndex) > 0 {
+		action := AliasAction{
+			Remove: JsonAlias{
+				Alias: alias,
+				Index: oldIndex,
+			},
+		}
+		actions = append(actions, action)
+	}
+
+	if len(newIndex) > 0 {
+		action := AliasAction{
+			Add: JsonAlias{
+				Alias: alias,
+				Index: newIndex,
+			},
+		}
+		actions = append(actions, action)
+	}
+
+	requestBody, err := json.Marshal(aliasOption)
+	if err != nil {
+		return retval, err
+	}
+
+	body, err := c.DoCommand("POST", "/_aliases", nil, requestBody)
+	if err != nil {
+		return retval, err
+	}
+
+	if jsonErr := json.Unmarshal(body, &retval); jsonErr != nil {
+		return retval, jsonErr
+	}
+
+	return retval, nil
 }

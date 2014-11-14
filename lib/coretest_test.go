@@ -45,6 +45,7 @@ var (
 
 func InitTests(startIndexer bool) *Conn {
 	c := NewConn()
+	c.SetHosts([]string{})
 
 	if !hasStartedTesting {
 		flag.Parse()

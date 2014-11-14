@@ -21,19 +21,27 @@ import (
 type Mapping map[string]MappingOptions
 
 type MappingOptions struct {
-	Id         IdOptions              `json:"_id"`
-	Timestamp  TimestampOptions       `json:"_timestamp"`
+	Id         IdOptions              `json:"_id,omitempty"`
+	Timestamp  TimestampOptions       `json:"_timestamp,omitempty"`
 	Analyzer   *AnalyzerOptions       `json:"_analyzer,omitempty"`
 	Parent     *ParentOptions         `json:"_parent,omitempty"`
 	Routing    *RoutingOptions        `json:"_routing,omitempty"`
 	Size       *SizeOptions           `json:"_size,omitempty"`
 	Source     *SourceOptions         `json:"_source,omitempty"`
 	Type       *TypeOptions           `json:"_type,omitempty"`
-	Properties map[string]interface{} `json:"properties"`
+	TTL        TTLOptions             `json:"_ttl,omitempty"`
+	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
 type TimestampOptions struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool   `json:"enabled,omitempty"`
+	Store   bool   `json:"store,omitempty"`
+	Path    string `json:"path,omitempty"`
+}
+
+type TTLOptions struct {
+	Enabled bool   `json:"enabled,omitempty"`
+	Default string `json:"default,omitempty"`
 }
 
 type AnalyzerOptions struct {
@@ -69,6 +77,11 @@ type TypeOptions struct {
 type IdOptions struct {
 	Index string `json:"index,omitempty"`
 	Path  string `json:"path,omitempty"`
+}
+
+type PropertyOptions struct {
+	Type  string `json:"type"`
+	Index string `json:"index,omitempty"`
 }
 
 func (m_ Mapping) Options() MappingOptions {
