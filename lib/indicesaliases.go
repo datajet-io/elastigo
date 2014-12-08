@@ -21,8 +21,8 @@ type JsonAliases struct {
 }
 
 type AliasAction struct {
-	Add    JsonAlias `json:"add,omitempty"`
-	Remove JsonAlias `json:"remove,omitempty"`
+	Add    *JsonAlias `json:"add,omitempty"`
+	Remove *JsonAlias `json:"remove,omitempty"`
 }
 
 type JsonAlias struct {
@@ -45,8 +45,10 @@ func (c *Conn) AddAlias(index string, alias string) (BaseResponse, error) {
 
 	jsonAliases := JsonAliases{}
 	jsonAliasAdd := AliasAction{}
-	jsonAliasAdd.Add.Alias = alias
-	jsonAliasAdd.Add.Index = index
+	jsonAliasAdd.Add = &JsonAlias{
+		Index: index,
+		Alias: alias,
+	}
 	jsonAliases.Actions = append(jsonAliases.Actions, jsonAliasAdd)
 	requestBody, err := json.Marshal(jsonAliases)
 
@@ -79,40 +81,50 @@ func (c *Conn) CheckAlias(alias string) (bool, error) {
 	return true, nil
 }
 
+type AliasInfo map[string]interface{}
+
+func (c *Conn) GetAliasIndex(alias string) (string, error) {
+	body, err := c.DoCommand("GET", "/_alias/"+alias, nil, nil)
+	if err != nil {
+		return "", err
+	}
+
+	var retval AliasInfo
+	jsonErr := json.Unmarshal(body, &retval)
+	if jsonErr != nil {
+		return "", jsonErr
+	}
+
+	for key, _ := range retval {
+		return key, nil
+	}
+
+	return "", fmt.Errorf("No Alias %s found!", alias)
+}
+
 func (c *Conn) PutAliases(oldIndex, newIndex, alias string) (BaseResponse, error) {
 	var retval BaseResponse
 
-	actions := make([]AliasAction, 0)
-	aliasOption := JsonAliases{
-		Actions: actions,
-	}
-
+	action := AliasAction{}
 	if len(oldIndex) > 0 {
-		action := AliasAction{
-			Remove: JsonAlias{
-				Alias: alias,
-				Index: oldIndex,
-			},
+		action.Remove = &JsonAlias{
+			Alias: alias,
+			Index: oldIndex,
 		}
-		actions = append(actions, action)
 	}
 
 	if len(newIndex) > 0 {
-		action := AliasAction{
-			Add: JsonAlias{
-				Alias: alias,
-				Index: newIndex,
-			},
+		action.Add = &JsonAlias{
+			Alias: alias,
+			Index: newIndex,
 		}
-		actions = append(actions, action)
 	}
 
-	requestBody, err := json.Marshal(aliasOption)
-	if err != nil {
-		return retval, err
+	aliasOption := JsonAliases{
+		Actions: []AliasAction{action},
 	}
 
-	body, err := c.DoCommand("POST", "/_aliases", nil, requestBody)
+	body, err := c.DoCommand("POST", "/_aliases", nil, aliasOption)
 	if err != nil {
 		return retval, err
 	}

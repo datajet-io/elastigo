@@ -52,7 +52,6 @@ func (c *Conn) CreateIndexWithSettings(index string, settings interface{}) (Base
 	}
 
 	requestBody, err := json.Marshal(settings)
-
 	if err != nil {
 		return retval, err
 	}
@@ -94,8 +93,8 @@ func (c *Conn) CreateIndexWithConfig(index string, config interface{}) (BaseResp
 	}
 
 	configType := reflect.TypeOf(config)
-	if configType.Kind() != reflect.Struct {
-		return retval, fmt.Errorf("Config kind was not struct")
+	if configType.Kind() != reflect.Struct && configType.Kind() != reflect.Map {
+		return retval, fmt.Errorf("Config kind was not struct or map")
 	}
 
 	requestBody, err := json.Marshal(config)
