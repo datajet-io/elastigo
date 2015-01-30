@@ -42,6 +42,9 @@ type Conn struct {
 	//hp             hostpool.HostPool
 	//once           sync.Once
 
+	// if Robust is false, any underlying connection will exit the program.
+	Robust bool
+
 	// To compute the weighting scores, we perform a weighted average of recent response times,
 	// over the course of `DecayDuration`. DecayDuration may be set to 0 to use the default
 	// value of 5 minutes. The EpsilonValueCalculator uses this to calculate a score
@@ -49,7 +52,7 @@ type Conn struct {
 	//DecayDuration time.Duration
 }
 
-func NewConn() *Conn {
+func NewConn(robust bool) *Conn {
 	return &Conn{
 		// Maintain these for backwards compatibility
 		Protocol:       DefaultProtocol,
@@ -57,6 +60,7 @@ func NewConn() *Conn {
 		ClusterDomains: []string{DefaultDomain},
 		Port:           DefaultPort,
 		//DecayDuration:  time.Duration(DefaultDecayDuration * time.Second),
+		Robust: robust,
 	}
 }
 
