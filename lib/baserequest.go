@@ -52,7 +52,8 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 	httpStatusCode, body, err = req.Do(&response)
 
 	if err != nil {
-		return body, err
+		//return body, err
+		log.Fatalln(err.Error())
 	}
 	if httpStatusCode > 304 {
 
