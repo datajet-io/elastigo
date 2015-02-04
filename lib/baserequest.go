@@ -52,7 +52,7 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 	httpStatusCode, body, err = req.Do(&response)
 
 	if err != nil {
-		if c.Robust || err == RecordNotFound {
+		if c.Robust || err == RecordNotFound {
 			return body, err
 		} else {
 			log.Fatalln(err.Error())
