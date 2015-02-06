@@ -143,7 +143,7 @@ func (c *Conn) Scroll(args map[string]interface{}, scroll_id string) (SearchResu
 
 	url = "/_search/scroll"
 
-	body, err := c.DoCommand("GET", url, args, scroll_id)
+	body, err := c.DoCommand("POST", url, args, scroll_id)
 	if err != nil {
 		return retval, err
 	}
