@@ -34,16 +34,16 @@ import (
 // timeout is optional
 // http://www.elasticsearch.org/guide/reference/api/index_.html
 func (c *Conn) Index(index string, _type string, id string, args map[string]interface{}, data interface{}) (BaseResponse, error) {
-	return c.IndexWithParameters(index, _type, id, "", 0, "", "", "", 0, "", "", false, args, data)
+	return c.IndexWithParameters(index, _type, id, "", 0, "", "", "", 0, "", "", false, "", args, data)
 }
 
 // IndexWithParameters takes all the potential parameters available
 func (c *Conn) IndexWithParameters(index string, _type string, id string, parentId string, version int, op_type string,
-	routing string, timestamp string, ttl int, percolate string, timeout string, refresh bool,
+	routing string, timestamp string, ttl int, percolate string, timeout string, refresh bool, consistency string,
 	args map[string]interface{}, data interface{}) (BaseResponse, error) {
 	var url string
 	var retval BaseResponse
-	url, err := GetIndexUrl(index, _type, id, parentId, version, op_type, routing, timestamp, ttl, percolate, timeout, refresh)
+	url, err := GetIndexUrl(index, _type, id, parentId, version, op_type, routing, timestamp, ttl, percolate, timeout, refresh, consistency)
 	if err != nil {
 		return retval, err
 	}
@@ -68,7 +68,7 @@ func (c *Conn) IndexWithParameters(index string, _type string, id string, parent
 }
 
 func GetIndexUrl(index string, _type string, id string, parentId string, version int, op_type string,
-	routing string, timestamp string, ttl int, percolate string, timeout string, refresh bool) (retval string, e error) {
+	routing string, timestamp string, ttl int, percolate string, timeout string, refresh bool, consistency string) (retval string, e error) {
 
 	if len(index) == 0 {
 		return "", errors.New("index can not be blank")
@@ -125,6 +125,10 @@ func GetIndexUrl(index string, _type string, id string, parentId string, version
 
 	if refresh {
 		values.Add("refresh", "true")
+	}
+
+	if len(consistency) > 0 {
+		values.Add("consistency", consistency)
 	}
 
 	partialURL += "?" + values.Encode()
