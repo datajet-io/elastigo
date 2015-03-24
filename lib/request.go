@@ -65,16 +65,16 @@ func (r *Request) SetBody(body io.Reader) {
 	}
 }
 
-func (r *Request) Do(v interface{}) (int, []byte, error) {
-	response, bodyBytes, err := r.DoResponse(v)
+func (r *Request) Do(client *http.Client, v interface{}) (int, []byte, error) {
+	response, bodyBytes, err := r.DoResponse(client, v)
 	if err != nil {
 		return -1, nil, err
 	}
 	return response.StatusCode, bodyBytes, err
 }
 
-func (r *Request) DoResponse(v interface{}) (*http.Response, []byte, error) {
-	res, err := http.DefaultClient.Do(r.Request)
+func (r *Request) DoResponse(client *http.Client, v interface{}) (*http.Response, []byte, error) {
+	res, err := client.Do(r.Request)
 	// Inform the HostPool of what happened to the request and allow it to update
 	r.hostResponse.Mark(err)
 	if err != nil {

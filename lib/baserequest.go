@@ -49,7 +49,7 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 		}
 
 	}
-	httpStatusCode, body, err = req.Do(&response)
+	httpStatusCode, body, err = req.Do(c.Client, &response)
 
 	if err != nil {
 		if c.Robust || err == RecordNotFound {
@@ -107,7 +107,7 @@ func (c *Conn) Exists(index string, _type string, id string, args map[string]int
 	if err != nil {
 		// some sort of generic error handler
 	}
-	httpStatusCode, body, err = req.Do(&response)
+	httpStatusCode, body, err = req.Do(c.Client, &response)
 	if httpStatusCode > 304 {
 		if error, ok := response["error"]; ok {
 			status, _ := response["status"]

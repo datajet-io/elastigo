@@ -45,6 +45,9 @@ type Conn struct {
 	// if Robust is false, any underlying connection will exit the program.
 	Robust bool
 
+	// net/http Client to use for requests
+	Client *http.Client
+
 	// To compute the weighting scores, we perform a weighted average of recent response times,
 	// over the course of `DecayDuration`. DecayDuration may be set to 0 to use the default
 	// value of 5 minutes. The EpsilonValueCalculator uses this to calculate a score
@@ -64,6 +67,10 @@ func NewConn(robust bool) *Conn {
 	}
 }
 
+func (c *Conn) SetClient(client *http.Client) {
+	c.Client = client
+}
+
 func (c *Conn) SetPort(port string) {
 	c.Port = port
 }
@@ -80,6 +87,10 @@ func (c *Conn) SetHosts(newhosts []string) {
 
 // Set up the host pool to be used
 func (c *Conn) initializeHostPool() {
+	// If no client set, use http.DefaultClient
+	if c.Client == nil {
+		c.Client = http.DefaultClient
+	}
 
 	// If no hosts are set, fallback to defaults
 	if len(c.Hosts) == 0 {
