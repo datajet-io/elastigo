@@ -25,6 +25,7 @@ import (
 )
 
 type Request struct {
+	*http.Client
 	*http.Request
 	hostResponse hostpool.HostPoolResponse
 }
