@@ -20,7 +20,7 @@ import (
 // The response includes a docs array with all the fetched documents, each element similar in structure to a document
 // provided by the get API.
 // see http://www.elasticsearch.org/guide/reference/api/multi-get.html
-func (c *Conn) MGet(index string, _type string, mgetRequest MGetRequestContainer, args map[string]interface{}) (MGetResponseContainer, error) {
+func (c *Conn) MGet(index string, _type string, mgetRequest interface{}, args map[string]interface{}) (MGetResponseContainer, error) {
 	var url string
 	var retval MGetResponseContainer
 	if len(index) <= 0 {
@@ -50,10 +50,10 @@ type MGetRequestContainer struct {
 }
 
 type MGetRequest struct {
-	Index  string   `json:"_index"`
-	Type   string   `json:"_type"`
-	ID     string   `json:"_id"`
-	IDS    []string `json:"_ids,omitempty"`
+	Index  string   `json:"_index,omitempty"`
+	Type   string   `json:"_type,omitempty"`
+	ID     string   `json:"_id,omitempty"`
+	IDS    []string `json:"ids,omitempty"`
 	Fields []string `json:"fields,omitempty"`
 }
 
