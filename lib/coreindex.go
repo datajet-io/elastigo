@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 // Index adds or updates a typed JSON document in a specific index, making it searchable, creating an index
@@ -55,6 +56,9 @@ func (c *Conn) IndexWithParameters(index string, _type string, id string, parent
 	}
 	body, err := c.DoCommand(method, url, args, data)
 	if err != nil {
+		if strings.Index(err.Error(), "document already exists") != -1 {
+			return retval, DocAlreadyExists
+		}
 		return retval, err
 	}
 	if err == nil {
