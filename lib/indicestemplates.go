@@ -10,3 +10,55 @@
 // limitations under the License.
 
 package elastigo
+
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+)
+
+func (c *Conn) CheckTemplate(name string) (bool, error) {
+	_, err := c.DoCommand("GET", "/_template/"+name, nil, nil)
+	if err != nil {
+		if err == RecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+// CreateTemplateWithConfig creates an template with config
+func (c *Conn) CreateTemplateWithConfig(name string, config interface{}) (BaseResponse, error) {
+	var url string
+	var retval BaseResponse
+
+	if len(name) > 0 {
+		url = fmt.Sprintf("/_template/%s", name)
+	} else {
+		return retval, fmt.Errorf("You must specify a template name")
+	}
+
+	configType := reflect.TypeOf(config)
+	if configType.Kind() != reflect.Struct && configType.Kind() != reflect.Map {
+		return retval, fmt.Errorf("Config kind was not struct or map")
+	}
+
+	requestBody, err := json.Marshal(config)
+	if err != nil {
+		return retval, err
+	}
+
+	body, err := c.DoCommand("PUT", url, nil, requestBody)
+	if err != nil {
+		return retval, err
+	}
+
+	jsonErr := json.Unmarshal(body, &retval)
+	if jsonErr != nil {
+		return retval, jsonErr
+	}
+
+	return retval, err
+}
