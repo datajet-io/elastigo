@@ -211,6 +211,29 @@ type Hit struct {
 	Highlight   *Highlight       `json:"highlight,omitempty"`
 }
 
+func (hit Hit) GetField(fieldName string) (interface{}, error) {
+	if hit.Fields == nil {
+		return nil, fmt.Errorf("'fields' not in hit")
+	}
+
+	data, err := hit.Fields.MarshalJSON()
+	if err != nil {
+		return json.Number(0), err
+	}
+
+	fields := map[string]interface{}{}
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return nil, err
+	}
+
+	v, found := fields[fieldName]
+	if !found {
+		return nil, fmt.Errorf("field '%s' not found", fieldName)
+	}
+
+	return v, nil
+}
+
 func (e *Explanation) String(indent string) string {
 	if len(e.Details) == 0 {
 		return fmt.Sprintf("%s>>>  %v = %s", indent, e.Value, strings.Replace(e.Description, "\n", "", -1))
@@ -221,6 +244,22 @@ func (e *Explanation) String(indent string) string {
 		}
 		return fmt.Sprintf("%s%v = %s(\n%s\n%s)", indent, e.Value, strings.Replace(e.Description, "\n", "", -1), strings.Join(detailStrs, "\n"), indent)
 	}
+}
+
+// for Aggregations Buckets in SearchResult
+type SearchResultAggsBucket struct {
+	Key           interface{}           `json:"key,omitempty"`
+	DocCount      int64                 `json:"doc_count,omitempty"`
+	PositionStats *SearchResutAggsStats `json:"position_stats,omitempty"`
+	ResultsStats  *SearchResutAggsStats `json:"results_stats,omitempty"`
+}
+
+type SearchResutAggsStats struct {
+	Count float64 `json:"count,omitempty"`
+	Min   float64 `json:"min,omitempty"`
+	Max   float64 `json:"max,omitempty"`
+	Avg   float64 `json:"avg,omitempty"`
+	Sum   float64 `json:"sum,omitempty"`
 }
 
 // Elasticsearch returns some invalid (according to go) json, with floats having...
