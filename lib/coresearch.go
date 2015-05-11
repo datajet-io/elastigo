@@ -12,6 +12,7 @@
 package elastigo
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -222,7 +223,10 @@ func (hit Hit) GetField(fieldName string) (interface{}, error) {
 	}
 
 	fields := map[string]interface{}{}
-	if err := json.Unmarshal(data, &fields); err != nil {
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber()
+	if err := decoder.Decode(&fields); err != nil {
 		return nil, err
 	}
 
