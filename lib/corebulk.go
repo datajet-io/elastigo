@@ -310,7 +310,7 @@ func (b *BulkIndexer) UpdateWithWithScript(index string, _type string, id, ttl s
 
 	var data map[string]interface{} = make(map[string]interface{})
 	data["script"] = script
-	return b.Update(index, _type, id, ttl, date, data, refresh, "")
+	return b.Update(index, _type, id, "", ttl, date, data, refresh, "")
 }
 
 func (b *BulkIndexer) UpdateWithPartialDoc(index string, _type string, id, ttl string, date *time.Time, partialDoc interface{}, upsert bool, refresh bool, consistency string) error {
