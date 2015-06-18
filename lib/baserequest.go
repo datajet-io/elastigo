@@ -64,11 +64,13 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 
 	httpStatusCode, body, err = req.Do(c.Client, &response)
 	if err != nil {
-		if c.Robust || err == RecordNotFound {
+		if c.Robust || IsRecordNotFound(err) {
 			return body, err
-		} else {
-			log.Fatalln(err.Error())
 		}
+
+		// if not robust connection, and not 404 http error, kill itself
+		// to be moved to the upper application
+		log.Fatalln(err.Error())
 	}
 	if httpStatusCode > 304 {
 
@@ -76,7 +78,7 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 		if jsonErr == nil {
 			if res_err, ok := response["error"]; ok {
 				status, _ := response["status"]
-				return body, ESError{time.Now(), fmt.Sprintf("Error [%s] Status [%v]", res_err, status), httpStatusCode}
+				return body, &ESError{time.Now(), fmt.Sprintf("Error [%s] Status [%v]", res_err, status), httpStatusCode}
 			}
 		}
 		return body, jsonErr
@@ -93,6 +95,16 @@ type ESError struct {
 
 func (e ESError) Error() string {
 	return fmt.Sprintf("%v: %v [%v]", e.When, e.What, e.Code)
+}
+
+// IsRecordNotFound checks if the error of http 404 error
+func IsRecordNotFound(err error) bool {
+	if esErr, ok := err.(*ESError); ok {
+		if esErr.Code == 404 {
+			return true
+		}
+	}
+	return false
 }
 
 // Exists allows the caller to check for the existance of a document using HEAD

@@ -72,7 +72,7 @@ func (c *Conn) AddAlias(index string, alias string) (BaseResponse, error) {
 func (c *Conn) CheckAlias(alias string) (bool, error) {
 	_, err := c.DoCommand("GET", "/_alias/"+alias, nil, nil)
 	if err != nil {
-		if err == RecordNotFound {
+		if IsRecordNotFound(err) {
 			return false, nil
 		}
 		return false, err

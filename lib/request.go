@@ -22,6 +22,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Request struct {
@@ -90,7 +91,7 @@ func (r *Request) DoResponse(client *http.Client, v interface{}) (*http.Response
 	}
 
 	if res.StatusCode == 404 {
-		return nil, bodyBytes, RecordNotFound
+		return nil, bodyBytes, &ESError{time.Now(), fmt.Sprintf("%v", bodyBytes), res.StatusCode}
 	}
 
 	if res.StatusCode > 304 && v != nil {
