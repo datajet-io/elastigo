@@ -43,9 +43,6 @@ type Conn struct {
 	hp             hostpool.HostPool
 	once           sync.Once
 
-	// if Robust is false, any underlying connection will exit the program.
-	Robust bool
-
 	// net/http Client to use for requests
 	Client *http.Client
 
@@ -56,7 +53,7 @@ type Conn struct {
 	DecayDuration time.Duration
 }
 
-func NewConn(robust bool) *Conn {
+func NewConn() *Conn {
 	return &Conn{
 		// Maintain these for backwards compatibility
 		Protocol:       DefaultProtocol,
@@ -64,7 +61,6 @@ func NewConn(robust bool) *Conn {
 		ClusterDomains: []string{DefaultDomain},
 		Port:           DefaultPort,
 		DecayDuration:  time.Duration(DefaultDecayDuration * time.Second),
-		Robust:         robust,
 	}
 }
 

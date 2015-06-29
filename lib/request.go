@@ -80,14 +80,14 @@ func (r *Request) DoResponse(client *http.Client, v interface{}) (*http.Response
 	// Inform the HostPool of what happened to the request and allow it to update
 	r.hostResponse.Mark(err)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &ESError{time.Now(), err.Error(), connErrorCode}
 	}
 
 	defer res.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &ESError{time.Now(), err.Error(), connErrorCode}
 	}
 
 	if res.StatusCode == 404 {
@@ -97,7 +97,7 @@ func (r *Request) DoResponse(client *http.Client, v interface{}) (*http.Response
 	if res.StatusCode > 304 && v != nil {
 		jsonErr := json.Unmarshal(bodyBytes, v)
 		if jsonErr != nil {
-			return nil, nil, jsonErr
+			return nil, nil, &ESError{time.Now(), jsonErr.Error(), connErrorCode}
 		}
 	}
 	return res, bodyBytes, err
