@@ -91,7 +91,7 @@ func (r *Request) DoResponse(client *http.Client, v interface{}) (*http.Response
 	}
 
 	if res.StatusCode == 404 {
-		return nil, bodyBytes, &ESError{time.Now(), fmt.Sprintf("%v", bodyBytes), res.StatusCode}
+		return nil, bodyBytes, &ESError{time.Now(), fmt.Sprintf("%s", bodyBytes), res.StatusCode}
 	}
 
 	if res.StatusCode > 304 && v != nil {
