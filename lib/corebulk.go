@@ -53,6 +53,11 @@ type BulkIndexer struct {
 	// operation has occurred
 	Refresh bool
 
+	// The consistency parameter denotes the minimum number of active shards required
+	// in the partition. The values allowed are one, quorum, and all.
+	// The default value is quorum.
+	Consistency string
+
 	// If we encounter an error in sending, we are going to retry for this long
 	// before returning an error
 	// if 0 it will not retry
@@ -111,6 +116,7 @@ func (c *Conn) NewBulkIndexer(maxConns int) *BulkIndexer {
 	b.bulkChannel = make(chan []byte, 100)
 	b.sendWg = new(sync.WaitGroup)
 	b.timerDoneChan = make(chan struct{})
+	b.Consistency = "quorum"
 	return &b
 }
 
@@ -287,8 +293,18 @@ func (b *BulkIndexer) Index(index string, _type string, id, parent, ttl string, 
 	return nil
 }
 
+func (b *BulkIndexer) Create(index string, _type string, id, parent, ttl string, date *time.Time, data interface{}) error {
+	//{ "create" : { "_index" : "test", "_type" : "type1", "_id" : "1" } }
+	by, err := WriteBulkBytes("create", index, _type, id, parent, ttl, date, data)
+	if err != nil {
+		return err
+	}
+	b.bulkChannel <- by
+	return nil
+}
+
 func (b *BulkIndexer) Update(index string, _type string, id, parent, ttl string, date *time.Time, data interface{}) error {
-	//{ "index" : { "_index" : "test", "_type" : "type1", "_id" : "1" } }
+	//{ "update" : { "_index" : "test", "_type" : "type1", "_id" : "1" } }
 	by, err := WriteBulkBytes("update", index, _type, id, parent, ttl, date, data)
 	if err != nil {
 		return err
@@ -332,7 +348,7 @@ func (b *BulkIndexer) Send(buf *bytes.Buffer) error {
 
 	response := responseStruct{}
 
-	body, err := b.conn.DoCommand("POST", fmt.Sprintf("/_bulk?refresh=%t", b.Refresh), nil, buf)
+	body, err := b.conn.DoCommand("POST", fmt.Sprintf("/_bulk?refresh=%t&consistency=%s", b.Refresh, b.Consistency), nil, buf)
 
 	if err != nil {
 		atomic.AddUint64(&b.numErrors, 1)
@@ -353,7 +369,7 @@ func (b *BulkIndexer) Send(buf *bytes.Buffer) error {
 // http://www.elasticsearch.org/guide/reference/api/bulk.html
 func WriteBulkBytes(op string, index string, _type string, id, parent, ttl string, date *time.Time, data interface{}) ([]byte, error) {
 	// only index and update are currently supported
-	if op != "index" && op != "update" {
+	if op != "index" && op != "update" && op != "create" {
 		return nil, errors.New(fmt.Sprintf("Operation '%s' is not yet supported", op))
 	}
 
