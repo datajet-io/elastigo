@@ -28,8 +28,8 @@ type MappingOptions struct {
 	Routing    *RoutingOptions        `json:"_routing,omitempty"`
 	Size       *SizeOptions           `json:"_size,omitempty"`
 	Source     *SourceOptions         `json:"_source,omitempty"`
+	TTL        *TTLOptions            `json:"_ttl,omitempty"`
 	Type       *TypeOptions           `json:"_type,omitempty"`
-	TTL        TTLOptions             `json:"_ttl,omitempty"`
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
 
@@ -37,11 +37,6 @@ type TimestampOptions struct {
 	Enabled bool   `json:"enabled,omitempty"`
 	Store   bool   `json:"store,omitempty"`
 	Path    string `json:"path,omitempty"`
-}
-
-type TTLOptions struct {
-	Enabled bool   `json:"enabled,omitempty"`
-	Default string `json:"default,omitempty"`
 }
 
 type AnalyzerOptions struct {
@@ -72,6 +67,11 @@ type SourceOptions struct {
 type TypeOptions struct {
 	Store bool   `json:"store,omitempty"`
 	Index string `json:"index,omitempty"`
+}
+
+type TTLOptions struct {
+	Enabled bool   `json:"enabled"`
+	Default string `json:"default,omitempty"`
 }
 
 type IdOptions struct {
