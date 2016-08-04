@@ -47,6 +47,9 @@ type Conn struct {
 	hp             hostpool.HostPool
 	once           sync.Once
 
+	// net/http Client to use for requests
+	Client *http.Client
+
 	// To compute the weighting scores, we perform a weighted average of recent response times,
 	// over the course of `DecayDuration`. DecayDuration may be set to 0 to use the default
 	// value of 5 minutes. The EpsilonValueCalculator uses this to calculate a score
@@ -63,6 +66,10 @@ func NewConn() *Conn {
 		Port:           DefaultPort,
 		DecayDuration:  time.Duration(DefaultDecayDuration * time.Second),
 	}
+}
+
+func (c *Conn) SetClient(client *http.Client) {
+	c.Client = client
 }
 
 func (c *Conn) SetFromUrl(u string) error {
@@ -107,6 +114,10 @@ func (c *Conn) SetHosts(newhosts []string) {
 
 // Set up the host pool to be used
 func (c *Conn) initializeHostPool() {
+	// If no client set, use http.DefaultClient
+	if c.Client == nil {
+		c.Client = http.DefaultClient
+	}
 
 	// If no hosts are set, fallback to defaults
 	if len(c.Hosts) == 0 {

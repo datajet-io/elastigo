@@ -75,7 +75,7 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 		c.RequestTracer(req.Method, req.URL.String(), rbody)
 	}
 
-	httpStatusCode, body, err = req.Do(&response)
+	httpStatusCode, body, err = req.Do(c.Client, &response)
 	if err != nil {
 		return body, err
 	}
@@ -85,7 +85,7 @@ func (c *Conn) DoCommand(method string, url string, args map[string]interface{},
 		if jsonErr == nil {
 			if res_err, ok := response["error"]; ok {
 				status, _ := response["status"]
-				return body, ESError{time.Now(), fmt.Sprintf("Error [%s] Status [%v]", res_err, status), httpStatusCode}
+				return body, &ESError{time.Now(), fmt.Sprintf("Error [%s] Status [%v]", res_err, status), httpStatusCode}
 			}
 		}
 		return body, jsonErr
@@ -128,7 +128,7 @@ func (c *Conn) Exists(index string, _type string, id string, args map[string]int
 	if err != nil {
 		// some sort of generic error handler
 	}
-	httpStatusCode, body, err = req.Do(&response)
+	httpStatusCode, body, err = req.Do(c.Client, &response)
 	if httpStatusCode > 304 {
 		if error, ok := response["error"]; ok {
 			status, _ := response["status"]

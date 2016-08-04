@@ -10,3 +10,51 @@
 // limitations under the License.
 
 package elastigo
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+)
+
+// Status lists status details of all indices or the specified index.
+// http://www.elasticsearch.org/guide/reference/api/admin-indices-status.html
+func (c *Conn) Stats(args map[string]interface{}, indices ...string) (Stats, error) {
+	var retval Stats
+	var url string
+	if len(indices) > 0 {
+		url = fmt.Sprintf("/%s/_stats", strings.Join(indices, ","))
+
+	} else {
+		url = "/_stats"
+	}
+	body, err := c.DoCommand("GET", url, args, nil)
+	if err != nil {
+		return retval, err
+	}
+	if err == nil {
+		// marshall into json
+		jsonErr := json.Unmarshal(body, &retval)
+		if jsonErr != nil {
+			return retval, jsonErr
+		}
+	}
+	return retval, err
+}
+
+type Stats struct {
+	All *StatsAll `json:"_all"`
+}
+
+type StatsAll struct {
+	Primaries *StatsAllPrimaries `json:"primaries"`
+}
+
+type StatsAllPrimaries struct {
+	Docs *StatsAllPrimariesDocs `json:"docs"`
+}
+
+type StatsAllPrimariesDocs struct {
+	Count   int64 `json:"count"`
+	Deleted int64 `json:"deleted"`
+}

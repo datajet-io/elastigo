@@ -21,7 +21,7 @@ import (
 
 // The simplest usage of background bulk indexing
 func ExampleBulkIndexer_simple() {
-	c := elastigo.NewConn()
+	c := NewConn()
 
 	indexer := c.NewBulkIndexerErrors(10, 60)
 	indexer.Start()
@@ -31,7 +31,7 @@ func ExampleBulkIndexer_simple() {
 
 // The inspecting the response
 func ExampleBulkIndexer_responses() {
-	c := elastigo.NewConn()
+	c := NewConn()
 
 	indexer := c.NewBulkIndexer(10)
 	// Create a custom Sender Func, to allow inspection of response/error

@@ -52,7 +52,6 @@ func (c *Conn) CreateIndexWithSettings(index string, settings interface{}) (Base
 	}
 
 	requestBody, err := json.Marshal(settings)
-
 	if err != nil {
 		return retval, err
 	}
@@ -61,6 +60,46 @@ func (c *Conn) CreateIndexWithSettings(index string, settings interface{}) (Base
 		url = fmt.Sprintf("/%s", index)
 	} else {
 		return retval, fmt.Errorf("You must specify an index to create")
+	}
+
+	body, err := c.DoCommand("PUT", url, nil, requestBody)
+	if err != nil {
+		return retval, err
+	}
+
+	jsonErr := json.Unmarshal(body, &retval)
+	if jsonErr != nil {
+		return retval, jsonErr
+	}
+
+	return retval, err
+}
+
+type IndexConfig struct {
+	Settings Setting `json:"settings"`
+	Mappings Mapping `json:"mappings"`
+	Aliases  Aliases `json:"aliases,omitempty"`
+}
+
+// The create API allows you to create an indices with config
+func (c *Conn) CreateIndexWithConfig(index string, config interface{}) (BaseResponse, error) {
+	var url string
+	var retval BaseResponse
+
+	if len(index) > 0 {
+		url = fmt.Sprintf("/%s", index)
+	} else {
+		return retval, fmt.Errorf("You must specify an index to create")
+	}
+
+	configType := reflect.TypeOf(config)
+	if configType.Kind() != reflect.Struct && configType.Kind() != reflect.Map {
+		return retval, fmt.Errorf("Config kind was not struct or map")
+	}
+
+	requestBody, err := json.Marshal(config)
+	if err != nil {
+		return retval, err
 	}
 
 	body, err := c.DoCommand("PUT", url, nil, requestBody)

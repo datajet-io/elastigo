@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	hostpool "github.com/bitly/go-hostpool"
 )
@@ -98,36 +99,31 @@ func (r *Request) SetBody(body io.Reader) {
 	r.ContentLength = -1
 }
 
-func (r *Request) Do(v interface{}) (int, []byte, error) {
-	response, bodyBytes, err := r.DoResponse(v)
+func (r *Request) Do(client *http.Client, v interface{}) (int, []byte, error) {
+	response, bodyBytes, err := r.DoResponse(client, v)
 	if err != nil {
 		return -1, nil, err
 	}
 	return response.StatusCode, bodyBytes, err
 }
 
-func (r *Request) DoResponse(v interface{}) (*http.Response, []byte, error) {
-	var client = r.Client
-	if client == nil {
-		client = http.DefaultClient
-	}
-
+func (r *Request) DoResponse(client *http.Client, v interface{}) (*http.Response, []byte, error) {
 	res, err := client.Do(r.Request)
 	// Inform the HostPool of what happened to the request and allow it to update
 	r.hostResponse.Mark(err)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &ESError{time.Now(), err.Error(), connErrorCode}
 	}
 
 	defer res.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, &ESError{time.Now(), err.Error(), connErrorCode}
 	}
 
 	if res.StatusCode == 404 {
-		return nil, bodyBytes, RecordNotFound
+		return nil, bodyBytes, &ESError{time.Now(), fmt.Sprintf("%s", bodyBytes), res.StatusCode}
 	}
 
 	if res.StatusCode > 304 && v != nil {
@@ -144,7 +140,7 @@ func (r *Request) DoResponse(v interface{}) (*http.Response, []byte, error) {
 
 		jsonErr := json.Unmarshal(bodyBytes, v)
 		if jsonErr != nil {
-			return nil, nil, fmt.Errorf("Json response unmarshal error: [%s], response content: [%s]", jsonErr.Error(), string(bodyBytes))
+			return nil, nil, &ESError{time.Now(), jsonErr.Error(), connErrorCode}
 		}
 	}
 	return res, bodyBytes, err
