@@ -211,6 +211,7 @@ type Hit struct {
 	Explanation *Explanation     `json:"_explanation,omitempty"`
 	Highlight   *Highlight       `json:"highlight,omitempty"`
 	Sort        []interface{}    `json:"sort,omitempty"`
+	InnerHits   *json.RawMessage `json:"inner_hits,omitempty"`
 }
 
 func (hit Hit) GetField(fieldName string) (interface{}, error) {
